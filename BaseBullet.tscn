@@ -60,6 +60,7 @@ animations = [ {
 
 [node name="Bullet" type="Area2D"]
 position = Vector2( 297.774, 177.337 )
+scale = Vector2( 0.7, 0.8 )
 script = ExtResource( 2 )
 __meta__ = {
 "_edit_group_": true

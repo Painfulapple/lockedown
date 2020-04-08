@@ -13,6 +13,8 @@ var health = 2 setget set_health
 onready var sprite = get_node("AnimatedSprite")
 
 func _ready():
+	var trail = $"../Player/Trail";
+	trail.connect("end",self,"_on_Trail_end");
 	pitch = get_node("ShootSound").pitch_scale;
 	direction = floor(rand_range(0,8))
 	#$Area2D.connect("area_entered", self, "_on_Area2D_area_entered")
@@ -73,3 +75,52 @@ func set_health(h):
 	health = h
 	if h <= 0:
 		queue_free()
+
+func _on_Trail_end():
+	#if Input.is_action_pressed("ui_accept"):
+	var points = $"../Player/Trail".points;
+	find_intersections(points);
+
+
+func find_intersections(points):
+    var intersections = 0;
+
+    # Iterate all segments to see if they intersect another.
+    # (Start at 1 because it's easier to iterate pairs of points)
+    for i in range(1, len(points)):
+
+        # Note: the +1 makes sure we don't get two results per segment pairs
+        # (intersection of A into B and intersection of B into A, which are the same anyways)
+
+            var begin0 = points[i - 1]
+            var end0 = points[i]
+
+            var begin1 = global_position;
+            var end1 = global_position + Vector2(0,5000);
+
+            # Calculate intersection of the two segments
+            var intersection = get_segment_intersection(begin0, end0, begin1, end1)
+            if intersection != null:
+                intersections += 1;
+    if intersections == 1:
+        queue_free();
+
+    return intersections
+
+
+static func get_segment_intersection(a, b, c, d):
+    # http://paulbourke.net/geometry/pointlineplane/ <-- Good stuff
+    var cd = d - c
+    var ab = b - a
+    var div = cd.y * ab.x - cd.x * ab.y
+
+    if abs(div) > 0.001:
+        var ua = (cd.x * (a.y - c.y) - cd.y * (a.x - c.x)) / div
+        var ub = (ab.x * (a.y - c.y) - ab.y * (a.x - c.x)) / div
+        var intersection = a + ua * ab
+        if ua >= 0.0 and ua <= 1.0 and ub >= 0.0 and ub <= 1.0:
+            return intersection
+        return null
+
+    # Segments are parallel!
+    return null

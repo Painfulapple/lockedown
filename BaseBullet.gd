@@ -13,7 +13,7 @@ func _ready():
 	connect("body_entered", self, "_on_self_body_entered")
 
 func set_velocity(v):
-	velocity = v
+	velocity = v;
 	direction = fposmod(round(rad2deg(-velocity.angle())/45),8);
 	#if(velocity.y>0):
 	#	direction += 1

@@ -1,7 +1,10 @@
 extends KinematicBody2D
 
 export var speed = 800;
+var accel = 30000;
+var maxspd = 1200;
 var direction = 0;
+var velocity = Vector2.ZERO;
 var screen_size #this feels like it belongs somewhere else
 onready var fog = get_node("Camera2D/Fog")
 onready var sprite = get_node("AnimatedSprite")
@@ -18,23 +21,24 @@ func _ready():
 	#$RayCast2D.add_exception(self)
 
 func _process(delta):
-	
-	healthBar.animation = str(health);
-	
-	if(reload < firing):
-		reload += delta;
-	z_index = 99+position[1]*0.1
-	var velocity = Vector2.ZERO
-	if Input.is_action_pressed("right"):
-		velocity += Vector2.RIGHT
-	if Input.is_action_pressed("left"):
-		velocity += Vector2.LEFT
-	if Input.is_action_pressed("down"):
-		velocity += Vector2.DOWN
-	if Input.is_action_pressed("up"):
-		velocity += Vector2.UP
+	#Get inputs
+	var right = int(Input.is_action_pressed("ui_right"));
+	var left = int(Input.is_action_pressed("ui_left"));
+	var down = int(Input.is_action_pressed("ui_down"));
+	var up = int(Input.is_action_pressed("ui_up"));
+	var dir = Vector2(right-left,down-up);
+	#Do movement
+	if dir != Vector2.ZERO:
+		velocity += dir * accel * delta;
+		if velocity.length() > maxspd:
+			velocity = velocity.normalized()*maxspd;
+	elif velocity.length() > accel*delta*10:
+		velocity -= velocity.normalized() * delta * accel;
+	else:
+		velocity = velocity * 0;
+	position += velocity * delta;
+	#Change Sprite
 	if velocity.length() > 0:
-		velocity = velocity.normalized() * speed
 		direction = fposmod(floor(rad2deg(-velocity.angle())/45),8);
 		if(0 < velocity.angle() && velocity.angle() <= PI): # ||velocity.y>0 || (velocity.y==0 && velocity.x<0)):
 			direction += 1
@@ -42,8 +46,14 @@ func _process(delta):
 		sprite.animation = "walk"+str(direction)
 	else:
 		sprite.animation = "idle"+str(direction)
-	if(!test_move(transform,velocity * delta)):
-		position += velocity * delta
+	
+	#Other things
+	healthBar.animation = str(health);
+	
+	if(reload < firing):
+		reload += delta;
+	z_index = 99+position[1]*0.1
+
 
 func _on_Bullet_hit(damage):
 	health -= 1;
