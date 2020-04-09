@@ -14,3 +14,11 @@ func shoot_pattern():
 		count = 0;
 	else:
 		count+=1;
+	shoot(Vector2(300,0), 1200, 1)
+	shoot(Vector2(300,300), 1200, 1)
+	shoot(Vector2(0,300), 1200, 1)
+	shoot(Vector2(-300,300), 1200, 1)
+	shoot(Vector2(-300,0), 1200, 1)
+	shoot(Vector2(-300,-300), 1200, 1)
+	shoot(Vector2(0,-300), 1200, 1)
+	shoot(Vector2(300,-300), 1200, 1)
